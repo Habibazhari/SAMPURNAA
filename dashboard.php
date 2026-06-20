@@ -1,216 +1,87 @@
 <?php
-// dashboard.php - User Dashboard
 require_once 'config/database.php';
 require_once 'includes/functions.php';
+requireUser();
 
-requireLogin();
+ $db = getDB();
+ $uid = $_SESSION['user_id'];
 
-$page_title = 'Dashboard';
-$user_id = $_SESSION['user_id'];
-$db = getDB();
+ $stmt_trans = $db->prepare("SELECT COUNT(*) as total FROM transaksi WHERE user_id=? AND status='selesai'"); $stmt_trans->execute([$uid]); $total_trans = $stmt_trans->fetch()['total'];
+ $stmt_berat = $db->prepare("SELECT COALESCE(SUM(total_berat), 0) as total FROM transaksi WHERE user_id=? AND status='selesai'"); $stmt_berat->execute([$uid]); $total_berat = $stmt_berat->fetch()['total'];
+ $stmt_uang = $db->prepare("SELECT COALESCE(SUM(total_harga), 0) as total FROM transaksi WHERE user_id=? AND status='selesai'"); $stmt_uang->execute([$uid]); $total_uang = $stmt_uang->fetch()['total'];
 
-// Get user stats
-$stmt = $db->prepare("SELECT COUNT(*) as total FROM transaksi WHERE user_id = ? AND status = 'selesai'");
-$stmt->execute([$user_id]);
-$total_transaksi = $stmt->fetch()['total'];
+ $stmt_recent = $db->prepare("SELECT t.*, b.nama as bank_nama FROM transaksi t JOIN bank_sampah b ON t.bank_sampah_id=b.id WHERE t.user_id=? ORDER BY t.created_at DESC LIMIT 5");
+ $stmt_recent->execute([$uid]);
+ $recent = $stmt_recent->fetchAll();
 
-$stmt = $db->prepare("SELECT SUM(total_berat) as total FROM transaksi WHERE user_id = ? AND status = 'selesai'");
-$stmt->execute([$user_id]);
-$total_berat = $stmt->fetch()['total'] ?? 0;
-
-$stmt = $db->prepare("SELECT SUM(total_harga) as total FROM transaksi WHERE user_id = ? AND status = 'selesai'");
-$stmt->execute([$user_id]);
-$total_pendapatan = $stmt->fetch()['total'] ?? 0;
-
-// Get recent transactions
-$stmt = $db->prepare("SELECT t.*, b.nama as bank_sampah FROM transaksi t 
-                      JOIN bank_sampah b ON t.bank_sampah_id = b.id 
-                      WHERE t.user_id = ? 
-                      ORDER BY t.created_at DESC LIMIT 5");
-$stmt->execute([$user_id]);
-$recent_transactions = $stmt->fetchAll();
-
-// Get pending pickup
-$stmt = $db->prepare("SELECT COUNT(*) as total FROM pickup_request WHERE user_id = ? AND status = 'pending'");
-$stmt->execute([$user_id]);
-$pending_pickup = $stmt->fetch()['total'];
+ $badge_status = ['pending' => 'bg-amber-100 text-amber-700', 'diproses' => 'bg-blue-100 text-blue-700', 'selesai' => 'bg-emerald-100 text-emerald-700', 'dibatalkan' => 'bg-red-100 text-red-700'];
 
 include 'includes/header.php';
 ?>
 
-<div class="container py-4">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 mb-4">
-            <div class="dashboard-sidebar">
-                <div class="text-center mb-4">
-                    <img src="uploads/<?php echo $_SESSION['foto_profil'] ?? 'default.jpg'; ?>" alt="Profile" class="rounded-circle mb-2" width="80" height="80">
-                    <h5 class="mb-0"><?php echo $_SESSION['nama']; ?></h5>
-                    <small class="text-muted"><?php echo $_SESSION['email']; ?></small>
-                </div>
-                
-                <nav class="nav flex-column">
-                    <a class="nav-link active" href="dashboard.php">
-                        <i class="fas fa-tachometer-alt"></i> Dashboard
-                    </a>
-                    <a class="nav-link" href="transaksi.php">
-                        <i class="fas fa-exchange-alt"></i> Transaksi Saya
-                    </a>
-                    <a class="nav-link" href="poin.php">
-                        <i class="fas fa-coins"></i> Poin & Reward
-                    </a>
-                    <a class="nav-link" href="pickup.php">
-                        <i class="fas fa-truck"></i> Pickup Request
-                    </a>
-                    <a class="nav-link" href="profil.php">
-                        <i class="fas fa-user-cog"></i> Pengaturan Profil
-                    </a>
-                    <a class="nav-link text-danger" href="logout.php">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </a>
-                </nav>
-            </div>
-        </div>
-        
-        <!-- Main Content -->
-        <div class="col-md-9">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2 class="mb-0">Dashboard</h2>
-                    <p class="text-muted mb-0">Selamat datang kembali, <?php echo $_SESSION['nama']; ?>!</p>
-                </div>
-                <a href="transaksi_baru.php" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Transaksi Baru
-                </a>
-            </div>
-            
-            <!-- Info Boxes -->
-            <div class="row g-3 mb-4">
-                <div class="col-md-3 col-6">
-                    <div class="info-box info-box-success">
-                        <div class="info-box-content">
-                            <div>
-                                <div class="info-box-number"><?php echo $_SESSION['poin']; ?></div>
-                                <div>Total Poin</div>
-                            </div>
-                            <i class="fas fa-coins"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-3 col-6">
-                    <div class="info-box info-box-info">
-                        <div class="info-box-content">
-                            <div>
-                                <div class="info-box-number"><?php echo $total_transaksi; ?></div>
-                                <div>Transaksi</div>
-                            </div>
-                            <i class="fas fa-exchange-alt"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-3 col-6">
-                    <div class="info-box info-box-warning">
-                        <div class="info-box-content">
-                            <div>
-                                <div class="info-box-number"><?php echo number_format($total_berat, 1); ?> kg</div>
-                                <div>Total Sampah</div>
-                            </div>
-                            <i class="fas fa-weight"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-3 col-6">
-                    <div class="info-box info-box-success">
-                        <div class="info-box-content">
-                            <div>
-                                <div class="info-box-number" style="font-size: 1.2rem;"><?php echo formatRupiah($total_pendapatan); ?></div>
-                                <div>Pendapatan</div>
-                            </div>
-                            <i class="fas fa-money-bill-wave"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <?php if ($pending_pickup > 0): ?>
-            <!-- Alert Pickup Pending -->
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> Anda memiliki <strong><?php echo $pending_pickup; ?></strong> permintaan pickup yang menunggu konfirmasi. 
-                <a href="pickup.php" class="alert-link">Lihat detail</a>
-            </div>
-            <?php endif; ?>
-            
-            <!-- Recent Transactions -->
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Transaksi Terbaru</h5>
-                    <a href="transaksi.php" class="btn btn-sm btn-outline-success">Lihat Semua</a>
-                </div>
-                <div class="card-body">
-                    <?php if (count($recent_transactions) > 0): ?>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Tanggal</th>
-                                        <th>Bank Sampah</th>
-                                        <th>Berat</th>
-                                        <th>Total</th>
-                                        <th>Poin</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($recent_transactions as $trans): ?>
-                                    <tr>
-                                        <td><?php echo date('d/m/Y', strtotime($trans['tanggal'])); ?></td>
-                                        <td><?php echo $trans['bank_sampah']; ?></td>
-                                        <td><?php echo number_format($trans['total_berat'], 2); ?> kg</td>
-                                        <td><?php echo formatRupiah($trans['total_harga']); ?></td>
-                                        <td><span class="badge bg-warning"><?php echo $trans['total_poin']; ?> poin</span></td>
-                                        <td>
-                                            <?php
-                                            $badge_class = [
-                                                'pending' => 'secondary',
-                                                'diproses' => 'info',
-                                                'selesai' => 'success',
-                                                'dibatalkan' => 'danger'
-                                            ];
-                                            ?>
-                                            <span class="badge bg-<?php echo $badge_class[$trans['status']]; ?>">
-                                                <?php echo ucfirst($trans['status']); ?>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php else: ?>
-                        <div class="text-center py-5">
-                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">Belum ada transaksi</p>
-                            <a href="transaksi_baru.php" class="btn btn-success">Mulai Transaksi</a>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            
-            <!-- Tips Section -->
-            <div class="card mt-4 border-success">
-                <div class="card-header bg-success text-white">
-                    <i class="fas fa-lightbulb"></i> Tips Hari Ini
-                </div>
-                <div class="card-body">
-                    <h6>Pisahkan sampah organik dan anorganik</h6>
-                    <p class="mb-0 text-muted">Memilah sampah sejak dari rumah akan memudahkan proses daur ulang dan meningkatkan nilai jual sampah Anda!</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<div class="flex bg-slate-50 min-h-screen">
+    <?php include 'includes/sidebar_user.php'; ?>
 
+    <main class="flex-1 p-6 lg:p-10 overflow-y-auto">
+        <h1 class="text-2xl font-extrabold text-slate-900 mb-6" data-aos="fade-down">Dashboard</h1>
+
+        <!-- Stats Grid (Hanya 3 Kartu) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" data-aos="fade-up" data-aos-delay="100">
+                <div class="flex items-center justify-between mb-4"><div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl"><i class="fas fa-receipt"></i></div></div>
+                <h3 class="text-3xl font-extrabold text-gray-900 mb-1"><?= $total_trans ?></h3>
+                <p class="text-gray-500 text-sm font-medium">Transaksi Selesai</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" data-aos="fade-up" data-aos-delay="200">
+                <div class="flex items-center justify-between mb-4"><div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center text-xl"><i class="fas fa-weight-hanging"></i></div></div>
+                <h3 class="text-3xl font-extrabold text-gray-900 mb-1"><?= number_format($total_berat, 1) ?></h3>
+                <p class="text-gray-500 text-sm font-medium">Kg Sampah</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" data-aos="fade-up" data-aos-delay="300">
+                <div class="flex items-center justify-between mb-4"><div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-xl"><i class="fas fa-wallet"></i></div></div>
+                <h3 class="text-3xl font-extrabold text-gray-900 mb-1"><?= formatRupiah($total_uang) ?></h3>
+                <p class="text-gray-500 text-sm font-medium">Pendapatan</p>
+            </div>
+        </div>
+
+        <!-- Recent Transactions Table -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-8" data-aos="fade-up">
+            <div class="flex items-center justify-between p-6 border-b border-slate-100">
+                <h4 class="font-bold text-lg text-slate-900">Transaksi Terbaru</h4>
+                <a href="transaksi.php" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition">Lihat Semua <i class="fas fa-arrow-right ml-1"></i></a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 text-slate-500 uppercase text-xs tracking-wider border-b border-slate-100">
+                        <tr><th class="py-4 px-6 font-semibold">Tanggal</th><th class="py-4 px-6 font-semibold">Bank Sampah</th><th class="py-4 px-6 font-semibold">Berat</th><th class="py-4 px-6 font-semibold">Total</th><th class="py-4 px-6 font-semibold">Status</th></tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        <?php if (empty($recent)): ?>
+                            <tr><td colspan="5" class="text-center py-10 text-gray-400 font-medium">Belum ada transaksi</td></tr>
+                        <?php else: ?>
+                            <?php foreach ($recent as $r): ?>
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="py-4 px-6 text-sm text-slate-600"><?= date('d M Y', strtotime($r['tanggal'])) ?></td>
+                                <td class="py-4 px-6 text-sm text-slate-900 font-semibold"><?= htmlspecialchars($r['bank_nama']) ?></td>
+                                <td class="py-4 px-6 text-sm text-slate-700"><?= $r['total_berat'] ?> Kg</td>
+                                <td class="py-4 px-6 text-sm text-slate-900 font-bold"><?= formatRupiah($r['total_harga']) ?></td>
+                                <td class="py-4 px-6"><span class="px-3 py-1 text-xs font-bold rounded-full <?= $badge_status[$r['status']] ?>"><?= ucfirst($r['status']) ?></span></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tips Section -->
+        <div class="bg-gradient-to-r from-emerald-500 to-teal-500 p-6 rounded-2xl shadow-lg text-white flex items-center" data-aos="fade-up">
+            <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center text-3xl mr-5 backdrop-filter backdrop-blur-sm"><i class="fas fa-lightbulb"></i></div>
+            <div>
+                <h6 class="font-bold text-lg mb-1">Tips Hari Ini</h6>
+                <p class="text-sm opacity-90">Pastikan botol plastik bersih dari sisa minuman dan kardus dalam keadaan kering agar harga penjualan lebih tinggi!</p>
+            </div>
+        </div>
+    </main>
+</div>
 <?php include 'includes/footer.php'; ?>

@@ -1,0 +1,28 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="95" fill="#eafaf3"/>
+
+  <!-- building / bank sampah -->
+  <rect x="40" y="80" width="90" height="70" rx="6" fill="#28a745"/>
+  <rect x="40" y="68" width="90" height="16" rx="4" fill="#1e9e6f"/>
+  <rect x="55" y="100" width="22" height="28" rx="3" fill="#ffffff"/>
+  <rect x="93" y="100" width="22" height="28" rx="3" fill="#ffffff"/>
+  <text x="85" y="64" font-size="12" font-weight="700" text-anchor="middle" fill="#1e9e6f" font-family="Arial, sans-serif">BANK SAMPAH</text>
+
+  <!-- truck -->
+  <g>
+    <rect x="135" y="118" width="40" height="26" rx="4" fill="#60a5fa"/>
+    <rect x="170" y="124" width="18" height="20" rx="3" fill="#3b82f6"/>
+    <circle cx="148" cy="148" r="7" fill="#374151"/>
+    <circle cx="180" cy="148" r="7" fill="#374151"/>
+  </g>
+
+  <!-- person carrying bag -->
+  <g>
+    <circle cx="55" cy="170" r="9" fill="#ffb38a"/>
+    <rect x="46" y="178" width="18" height="20" rx="4" fill="#3b82f6"/>
+    <rect x="60" y="172" width="16" height="18" rx="3" fill="#fbbf24"/>
+  </g>
+
+  <!-- arrow -->
+  <path d="M75 175 C 95 165, 110 165, 128 158" fill="none" stroke="#28a745" stroke-width="4" stroke-dasharray="2 6" stroke-linecap="round"/>
+</svg>

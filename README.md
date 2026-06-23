@@ -48,6 +48,7 @@ Sistem ini cocok digunakan oleh kelompok bank sampah, pemerintah daerah, atau ko
 
 
 # Site Map
+```
 sampurna/
 ├── admin/
 │   ├── dashboard.php
@@ -93,7 +94,7 @@ sampurna/
 ├── artikel_detail.php
 ├── profil.php
 └── panduan.php
-
+```
 ---
 
 ## 🛠️ Tech Stack

@@ -272,10 +272,10 @@ Setelah login, sistem secara otomatis mengarahkan pengguna ke dashboard sesuai r
 
 | Halaman | Tampilan |
 |---------|----------|
-| Beranda | ![Beranda](docs/screenshots/1.png) |
-| Dashboard User | ![Dashboard User](docs/screenshots/4.png) |
-| Dashboard Admin | ![Dashboard Admin](docs/screenshots/3.png) |
-| Dashboard Petugas | ![Dahboard Petugas](docs/screenshots/2.png) |
+| Beranda | ![Beranda](Screenshots/1.png) |
+| Dashboard User | ![Dashboard User](Screenshots/4.png) |
+| Dashboard Admin | ![Dashboard Admin](Screenshots/3.png) |
+| Dashboard Petugas | ![Dahboard Petugas](Screenshots/2.png) |
 
 ---
 

@@ -270,14 +270,12 @@ Setelah login, sistem secara otomatis mengarahkan pengguna ke dashboard sesuai r
 
 ## 📷 Screenshot
 
-> *(Tambahkan screenshot UI di sini)*
-
 | Halaman | Tampilan |
 |---------|----------|
-| Beranda | `<img width="1901" height="908" alt="image" src="https://github.com/user-attachments/assets/88d35874-116f-4809-859f-77b77533df30" />` |
-| Dashboard User | `<img width="1898" height="907" alt="image" src="https://github.com/user-attachments/assets/8a638549-f2f8-464d-987b-633339025272" />` |
-| Dashboard Admin | `<img width="1896" height="907" alt="image" src="https://github.com/user-attachments/assets/040f2c70-df39-4291-8ef1-384fcfb56bd8" />` |
-| Dashboard Petugas | `<img width="1897" height="907" alt="image" src="https://github.com/user-attachments/assets/d173991a-e844-4ad1-b2c4-5752d908aa76" />` |
+| Beranda | ![Beranda](docs/screenshots/1.png) |
+| Dashboard User | ![Dashboard User](docs/screenshots/4.png) |
+| Dashboard Admin | ![Dashboard Admin](docs/screenshots/3.png) |
+| Dashboard Petugas | ![Dahboard Petugas](docs/screenshots/2.png) |
 
 ---
 

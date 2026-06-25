@@ -190,51 +190,7 @@ sampurna/
 ```
 ---
 
-## Cara Instalasi
-
-### Prasyarat
-- PHP >= 7.4
-- MySQL >= 5.7
-- Web server (Apache/Nginx) — disarankan XAMPP atau Laragon
-
-### Langkah Instalasi
-
-**1. Clone atau ekstrak project**
-```bash
-# Clone dari repository
-git clone https://github.com/username/sampurna.git
-
-# Atau ekstrak ZIP ke folder htdocs / www
-```
-
-**2. Pindahkan ke direktori web server**
-```
-XAMPP  : C:/xampp/htdocs/sampurna/
-Laragon: C:/laragon/www/sampurna/
-```
-
-**3. Import database**
-- Buka `phpMyAdmin` di browser
-- Buat database baru bernama `sampurna`
-- Import file `config/sampurna.sql`
-
-**4. Konfigurasi koneksi database**
-
-Edit file `config/database.php` dan sesuaikan:
-```php
-private $host     = "localhost";
-private $db_name  = "sampurna";
-private $username = "root";
-private $password = "";        // sesuaikan password MySQL Anda
-```
-
-**5. Buat folder uploads (jika belum ada)**
-```bash
-mkdir -p uploads/artikel
-mkdir -p uploads/profil
-```
-
-**6. Jalankan aplikasi**
+## Alamat
 
 Buka browser dan akses:
 ```
